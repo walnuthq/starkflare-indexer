@@ -32,7 +32,7 @@ To run the database and API locally, you can use the provided Docker Compose con
 
 3. Return to the root folder and start the indexer by running the following command with your Apibara DNA Key:
    
-   ```apibara run indexer/src/transactions.ts -A <APIBARA_DNA_KEY>```
+   ```apibara run indexer/src/account-calls.ts -A <APIBARA_DNA_KEY>```
    
 
 Once the indexer is running and the Docker Compose services are up, you can:
