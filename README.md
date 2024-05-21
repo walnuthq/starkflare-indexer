@@ -12,6 +12,10 @@ To set up the indexer locally, follow these steps:
 
 3. Set up your editor by following the instructions in the [Apibara documentation](https://www.apibara.com/docs/indexers/editor-setup).
 
+## API Implementation
+
+We are using PostgREST to create a RESTful API directly from our PostgreSQL database. PostgREST automatically generates API endpoints based on the database schema, allowing us to quickly expose the indexed data through a web API without the need for custom server-side code. This approach simplifies the development process and enables us to focus on the indexing logic and database design.
+
 ## Database Migrations
 
 This repository includes database migrations to set up the necessary tables for the indexer. The migration scripts are named using a numbered prefix followed by a descriptive name, such as 001_init.up.sql. The number represents the order in which the migrations should be applied.
