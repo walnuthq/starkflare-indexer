@@ -1,0 +1,6 @@
+FROM quay.io/apibara/sink-postgres:0.7.0-aarch64
+
+WORKDIR /app
+COPY ./indexer/src/* /app
+
+ENTRYPOINT ["/nix/store/h2227g8an2gg8dsr6bz7b3a040iqc3ln-apibara-sink-postgres-0.7.0/bin/apibara-sink-postgres", "run", "/app/account-calls.ts"]

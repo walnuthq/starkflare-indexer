@@ -19,7 +19,6 @@ export const config: Config<NetworkOptions, Postgres> = {
 	sinkType: 'postgres',
 	sinkOptions: {
 		tableName: 'starkflare_api.account_calls',
-		connectionString: 'postgresql://postgres:password@localhost:5432/postgres',
 	},
 }
 
