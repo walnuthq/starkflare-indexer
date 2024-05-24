@@ -1,6 +1,7 @@
 BEGIN;
 
 DROP FUNCTION IF EXISTS starkflare_api.get_user_stats();
+DROP FUNCTION IF EXISTS starkflare_api.get_top_transactions_by_steps();
 
 CREATE OR REPLACE FUNCTION starkflare_api.get_user_stats()
 RETURNS TABLE (
@@ -52,6 +53,32 @@ BEGIN
 
     RETURN QUERY
     SELECT unique_users_last_7_days, new_users_last_7_days, lost_users_last_7_days;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION starkflare_api.get_top_transactions_by_steps()
+RETURNS TABLE (
+    tx_hash VARCHAR(66),
+    steps_number INTEGER,
+    tx_timestamp INTEGER,
+    block_number INTEGER
+)
+AS $$
+DECLARE
+    current_period_start TIMESTAMP := DATE_TRUNC('day', NOW() - INTERVAL '7 days');
+    current_period_end TIMESTAMP := DATE_TRUNC('day', NOW());
+BEGIN
+    RETURN QUERY
+    SELECT
+        t.tx_hash,
+        t.steps_number,
+        t.timestamp,
+        t.block_number
+    FROM starkflare_api.account_calls t
+    WHERE t.timestamp >= EXTRACT(EPOCH FROM current_period_start)
+      AND t.timestamp < EXTRACT(EPOCH FROM current_period_end)
+    ORDER BY t.steps_number DESC
+    LIMIT 10;
 END;
 $$ LANGUAGE plpgsql;
 
