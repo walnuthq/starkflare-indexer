@@ -58,9 +58,9 @@ BEGIN
     -- Fetch top contracts by steps stats
     SELECT json_agg(
         json_build_object(
-            'contract_hash', contracts.contract_hash,
-            'contract_steps', contracts.contract_steps,
-            'contract_steps_percentage', contracts.contract_steps_percentage
+            'contract_address', contracts.contract_hash,
+            'steps_number', contracts.contract_steps,
+            'steps_percentage', contracts.contract_steps_percentage
         )
     ) INTO top_contracts_by_steps
     FROM starkflare_api.get_top_contracts_by_steps() AS contracts;
