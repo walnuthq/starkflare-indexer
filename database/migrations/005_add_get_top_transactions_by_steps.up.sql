@@ -37,6 +37,7 @@ DECLARE
     user_stats json;
     top_transactions json;
     transaction_stats json;
+    top_contracts_by_steps json;
 BEGIN
     -- Fetch user stats
     SELECT json_build_object(
@@ -45,6 +46,23 @@ BEGIN
         'lost_users_last_7_days', user_stats.lost_users_last_7_days
     ) INTO user_stats
     FROM starkflare_api.get_user_stats() AS user_stats;
+
+    -- Fetch transaction stats
+    SELECT json_build_object(
+        'transactions_count_last_7_days', transaction_stats.transactions_count_last_7_days,
+        'steps_number_last_7_days', transaction_stats.steps_number_last_7_days
+    ) INTO transaction_stats 
+    FROM starkflare_api.get_transaction_stats() AS transaction_stats;
+
+    -- Fetch top contracts by steps stats
+    SELECT json_agg(
+        json_build_object(
+            'contract_address', contracts.contract_hash,
+            'steps_number', contracts.contract_steps,
+            'steps_percentage', contracts.contract_steps_percentage
+        )
+    ) INTO top_contracts_by_steps
+    FROM starkflare_api.get_top_contracts_by_steps() AS contracts;
 
     -- Fetch top transactions by steps
     SELECT json_agg(json_build_object(
@@ -55,20 +73,13 @@ BEGIN
     )) INTO top_transactions
     FROM starkflare_api.get_top_transactions_by_steps() AS tx;
 
-    -- Fetch transaction stats
-    SELECT json_build_object(
-        'transactions_count_last_7_days', transaction_stats.transactions_count_last_7_days,
-        'steps_number_last_7_days', transaction_stats.steps_number_last_7_days
-    ) INTO transaction_stats 
-    FROM starkflare_api.get_transaction_stats() AS transaction_stats;
-
     RETURN json_build_object(
         'user_stats', user_stats,
-        'top_transactions_by_steps', top_transactions,
-        'transaction_stats', transaction_stats
+        'transaction_stats', transaction_stats,
+        'top_contracts_by_steps', top_contracts_by_steps,
+        'top_transactions_by_steps', top_transactions
     );
 END;
 $$ LANGUAGE plpgsql;
-
 
 COMMIT;

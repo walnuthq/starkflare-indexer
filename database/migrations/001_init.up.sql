@@ -78,9 +78,7 @@ RETURNS json
 AS $$
 DECLARE
     user_stats json;
-    top_transactions json;
 BEGIN
-    -- Fetch user stats
     SELECT json_build_object(
         'unique_users_last_7_days', user_stats.unique_users_last_7_days,
         'new_users_last_7_days', user_stats.new_users_last_7_days,
@@ -88,19 +86,7 @@ BEGIN
     ) INTO user_stats
     FROM starkflare_api.get_user_stats() AS user_stats;
 
-    -- Fetch top transactions by steps
-    SELECT json_agg(json_build_object(
-        'tx_hash', tx.tx_hash,
-        'steps_consumed', tx.steps_number,
-        'tx_timestamp', tx.tx_timestamp,
-        'block_number', tx.block_number
-    )) INTO top_transactions
-    FROM starkflare_api.get_top_transactions_by_steps() AS tx;
-
-    RETURN json_build_object(
-        'user_stats', user_stats,
-        'top_transactions_by_steps', top_transactions
-    );
+    RETURN json_build_object('user_stats', user_stats);
 END;
 $$ LANGUAGE plpgsql;
 
