@@ -15,15 +15,25 @@ DECLARE
     current_period_end TIMESTAMP := DATE_TRUNC('day', NOW());
 BEGIN
     RETURN QUERY
-    SELECT DISTINCT ON (t.tx_hash)
-        t.tx_hash,
-        t.steps_number,
-        t.timestamp AS tx_timestamp,
-        t.block_number
-    FROM starkflare_api.account_calls t
-    WHERE t.timestamp >= EXTRACT(EPOCH FROM current_period_start)
-      AND t.timestamp < EXTRACT(EPOCH FROM current_period_end)
-    ORDER BY t.tx_hash, t.steps_number DESC
+    WITH ranked_transactions AS (
+        SELECT 
+            t.tx_hash,
+            t.steps_number,
+            t.timestamp AS tx_timestamp,
+            t.block_number,
+            ROW_NUMBER() OVER (PARTITION BY t.tx_hash ORDER BY t.steps_number DESC) AS rnk
+        FROM starkflare_api.account_calls t
+        WHERE t.timestamp >= EXTRACT(EPOCH FROM current_period_start)
+          AND t.timestamp < EXTRACT(EPOCH FROM current_period_end)
+    )
+    SELECT 
+        r.tx_hash,
+        r.steps_number,
+        r.tx_timestamp,
+        r.block_number
+    FROM ranked_transactions r
+    WHERE rnk = 1
+    ORDER BY steps_number DESC
     LIMIT 10;
 END;
 $$ LANGUAGE plpgsql;
