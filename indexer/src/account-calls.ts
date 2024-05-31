@@ -134,6 +134,8 @@ function parseCalldataVariant1(calldata: string[]): { contractAddress: string; e
 
 		lastDataOffset += dataLen
 
+		// TODO: Figure out why contractAddress can be null. Fix and remove the next line
+		if (!contractAddress || !entrypointSelector) return []
 		result.push({ contractAddress: contractAddress, entrypointSelector: entrypointSelector })
 	}
 
@@ -160,6 +162,8 @@ function parseCalldataVariant2(calldata: string[]): { contractAddress: string; e
 		// Skip the data elements
 		index += numberOfDataElements
 
+		// TODO: Figure out why contractAddress can be null. Fix and remove the next line
+		if (!contractAddress || !entrypointSelector) return []
 		result.push({ contractAddress: contractAddress, entrypointSelector: entrypointSelector })
 	}
 
