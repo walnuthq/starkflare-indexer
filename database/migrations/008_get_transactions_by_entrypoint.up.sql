@@ -1,14 +1,15 @@
 BEGIN;
 
 CREATE OR REPLACE FUNCTION starkflare_api.get_transactions_by_entrypoint_table(
-  contract_address_param VARCHAR(66),
-  entrypoint_selector_param VARCHAR(66)
+  contract_address VARCHAR(66),
+  entrypoint_selector VARCHAR(66)
 )
 RETURNS TABLE (
     tx_hash VARCHAR(66),
     steps_number INTEGER,
     tx_timestamp INTEGER
 ) AS $$
+#variable_conflict use_variable
 BEGIN
     RETURN QUERY
     SELECT
@@ -16,15 +17,15 @@ BEGIN
       starkflare_api.account_calls.steps_number,
       starkflare_api.account_calls.timestamp
     FROM starkflare_api.account_calls
-    WHERE contract_address = contract_address_param
-      AND entrypoint_selector = entrypoint_selector_param
+    WHERE starkflare_api.account_calls.contract_address = contract_address
+      AND starkflare_api.account_calls.entrypoint_selector = entrypoint_selector
     ORDER BY steps_number DESC;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION starkflare_api.get_transactions_by_entrypoint(
-  contract_address_param VARCHAR(66),
-  entrypoint_selector_param VARCHAR(66)
+  contract_address VARCHAR(66),
+  entrypoint_selector VARCHAR(66)
 )
 RETURNS JSON
 AS $$
@@ -40,8 +41,8 @@ BEGIN
         )
     ) INTO transactions_by_entrypoint
     FROM starkflare_api.get_transactions_by_entrypoint_table(
-      contract_address_param,
-      entrypoint_selector_param
+      contract_address,
+      entrypoint_selector
     ) AS transactions_by_entrypoint_table;
 
     RETURN json_build_object('transactions', COALESCE(transactions_by_entrypoint, '[]'::json));
